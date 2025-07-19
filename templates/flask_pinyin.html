@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>汉字拼音可视化工具（Flask版）</title>
+  <style>
+    body { font-family: "微软雅黑", "Arial", sans-serif; margin: 40px; }
+    textarea { width: 100%; height: 100px; font-size: 18px; }
+    #result { margin-top: 20px; padding: 20px; border: 1px solid #ccc; min-height: 60px; font-size: 28px; background: #fafaff; }
+    ruby { ruby-align: center; ruby-position: over; }
+    rt { font-size: 13px; line-height: 1; vertical-align: middle; }
+    button { font-size: 18px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>汉字拼音可视化工具（Flask后端）</h2>
+  <textarea id="input" placeholder="请输入汉字文本"></textarea><br>
+  <button onclick="generatePinyin()">生成拼音</button>
+  <button onclick="downloadWord()">生成Word文档</button>
+  <button onclick="downloadHtml()">生成HTML文档</button>
+  <div id="result"></div>
+
+  <script>
+    async function generatePinyin() {
+      const text = document.getElementById('input').value;
+      const res = await fetch('/pinyin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      document.getElementById('result').innerHTML = data.html;
+    }
+
+    async function downloadWord() {
+      const text = document.getElementById('input').value;
+      const res = await fetch('/download_word', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '带拼音文档.docx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    }
+
+    async function downloadHtml() {
+      const text = document.getElementById('input').value;
+      const res = await fetch('/download_html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '带拼音文档.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
